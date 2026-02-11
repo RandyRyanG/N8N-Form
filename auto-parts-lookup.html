@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Parts Lookup</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --border: #2a2d35;
+    --accent: #e8c84a;
+    --accent-dim: rgba(232,200,74,0.12);
+    --text: #e2e4e9;
+    --muted: #5a5f6e;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Barlow', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 2rem;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px);
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .header {
+    margin-bottom: 2rem;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    padding: 2px 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: relative;
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .step-card.active {
+    opacity: 1;
+    pointer-events: auto;
+    border-color: var(--accent);
+  }
+
+  .step-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .step-card.active::before {
+    background: var(--accent);
+  }
+
+  .step-number {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  .input-wrap {
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.75rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]:focus {
+    border-color: var(--accent);
+  }
+
+  input[type="text"]::placeholder {
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0; right: 0;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-top: none;
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+  }
+
+  .dropdown::-webkit-scrollbar { width: 4px; }
+  .dropdown::-webkit-scrollbar-track { background: var(--bg); }
+  .dropdown::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .dropdown-item {
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  .dropdown-item:last-child { border-bottom: none; }
+
+  .dropdown-item:hover {
+    background: var(--accent-dim);
+  }
+
+  .item-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .item-meta {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .selected-info {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.75rem;
+    margin-top: 1rem;
+    display: none;
+  }
+
+  .selected-info.visible {
+    display: block;
+  }
+
+  .selected-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .selected-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .loading {
+    text-align: center;
+    padding: 1rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .error {
+    background: rgba(255, 74, 74, 0.1);
+    border: 1px solid rgba(255, 74, 74, 0.3);
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    color: #ff4a4a;
+    margin-top: 0.5rem;
+  }
+
+  .list-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .list-item:hover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .list-item-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .list-item-meta {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  .part-details {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    padding: 2rem;
+    margin-top: 2rem;
+    display: none;
+  }
+
+  .part-details.visible {
+    display: block;
+  }
+
+  .part-details h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .detail-key {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .detail-val {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .reset-btn {
+    background: var(--accent);
+    color: #0e0f11;
+    border: none;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: opacity 0.15s;
+    margin-top: 2rem;
+  }
+
+  .reset-btn:hover {
+    opacity: 0.85;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="tag">Auto Parts Catalog</span>
+    <h1>Part Lookup System</h1>
+    <p class="subtitle">Select manufacturer → model → engine → category → part</p>
+  </div>
+
+  <div class="grid">
+    <!-- Step 1: Manufacturer -->
+    <div class="step-card active" id="step-manufacturer">
+      <div class="step-number">Step 1</div>
+      <div class="step-title">Select Manufacturer</div>
+      <div class="input-wrap">
+        <input type="text" id="mfr-input" placeholder="Search manufacturers..." autocomplete="off">
+        <div class="dropdown" id="mfr-dropdown"></div>
+      </div>
+      <div class="selected-info" id="mfr-selected"></div>
+    </div>
+
+    <!-- Step 2: Model -->
+    <div class="step-card" id="step-model">
+      <div class="step-number">Step 2</div>
+      <div class="step-title">Select Model</div>
+      <div class="input-wrap">
+        <input type="text" id="model-input" placeholder="Search models..." autocomplete="off">
+        <div class="dropdown" id="model-dropdown"></div>
+      </div>
+      <div class="selected-info" id="model-selected"></div>
+    </div>
+
+    <!-- Step 3: Engine/Vehicle -->
+    <div class="step-card" id="step-vehicle">
+      <div class="step-number">Step 3</div>
+      <div class="step-title">Select Engine</div>
+      <div id="vehicle-list"></div>
+      <div class="selected-info" id="vehicle-selected"></div>
+    </div>
+
+    <!-- Step 4: Category -->
+    <div class="step-card" id="step-category">
+      <div class="step-number">Step 4</div>
+      <div class="step-title">Select Category</div>
+      <div id="category-list"></div>
+      <div class="selected-info" id="category-selected"></div>
+    </div>
+
+    <!-- Step 5: Parts -->
+    <div class="step-card" id="step-parts">
+      <div class="step-number">Step 5</div>
+      <div class="step-title">Select Part</div>
+      <div id="parts-list"></div>
+    </div>
+  </div>
+
+  <!-- Part Details Section -->
+  <div class="part-details" id="part-details">
+    <h2 id="part-title">Part Details</h2>
+    <div class="detail-grid" id="detail-grid"></div>
+    <button class="reset-btn" onclick="resetAll()">Start Over</button>
+  </div>
+</div>
+
+<script>
+// API Configuration
+const API_CONFIG = {
+  baseURL: 'https://auto-parts-catalog.p.rapidapi.com',
+  headers: {
+    'X-Rapidapi-Key': '8fb2497a6emshd8df4bd1562f068p19719fjsn3eb746bc7420',
+    'X-Rapidapi-Host': 'auto-parts-catalog.p.rapidapi.com'
+  },
+  typeId: 1,      // Automobile
+  langId: 4,      // English
+  countryFilterId: 168  // USA
+};
+
+// State
+const state = {
+  manufacturers: [],
+  manufacturer: null,
+  models: [],
+  model: null,
+  vehicles: [],
+  vehicle: null,
+  categories: [],
+  category: null,
+  parts: [],
+  part: null
+};
+
+// Initialize
+async function init() {
+  await loadManufacturers();
+  setupManufacturerSearch();
+}
+
+// Load hardcoded manufacturers
+async function loadManufacturers() {
+  state.manufacturers = [
+    {manufacturerId:36,manufacturerName:"FORD"},{manufacturerId:45,manufacturerName:"HONDA"},{manufacturerId:183,manufacturerName:"HYUNDAI"},{manufacturerId:184,manufacturerName:"KIA"},{manufacturerId:80,manufacturerName:"NISSAN"},{manufacturerId:111,manufacturerName:"TOYOTA"},{manufacturerId:16,manufacturerName:"BMW"},{manufacturerId:74,manufacturerName:"MERCEDES-BENZ"},{manufacturerId:5,manufacturerName:"AUDI"},{manufacturerId:121,manufacturerName:"VW"}
+  ];
+}
+
+// Step 1: Manufacturer Search
+function setupManufacturerSearch() {
+  const input = document.getElementById('mfr-input');
+  const dropdown = document.getElementById('mfr-dropdown');
+  
+  input.addEventListener('input', () => {
+    const query = input.value.toLowerCase();
+    if (query.length === 0) {
+      dropdown.style.display = 'none';
+      return;
+    }
+    
+    const matches = state.manufacturers.filter(m => 
+      m.manufacturerName.toLowerCase().includes(query)
+    );
+    
+    dropdown.innerHTML = matches.map(m => `
+      <div class="dropdown-item" onclick="selectManufacturer(${m.manufacturerId}, '${m.manufacturerName}')">
+        <div class="item-name">${m.manufacturerName}</div>
+        <div class="item-meta">#${m.manufacturerId}</div>
+      </div>
+    `).join('');
+    
+    dropdown.style.display = matches.length > 0 ? 'block' : 'none';
+  });
+  
+  input.addEventListener('blur', () => setTimeout(() => dropdown.style.display = 'none', 200));
+}
+
+// Select Manufacturer
+async function selectManufacturer(id, name) {
+  state.manufacturer = {id, name};
+  
+  document.getElementById('mfr-input').value = name;
+  document.getElementById('mfr-selected').innerHTML = `
+    <div class="selected-label">Selected</div>
+    <div class="selected-value">${name}</div>
+  `;
+  document.getElementById('mfr-selected').classList.add('visible');
+  
+  // Load models
+  await loadModels(id);
+  activateStep('step-model');
+}
+
+// Step 2: Load Models
+async function loadModels(manufacturerId) {
+  const url = `${API_CONFIG.baseURL}/models/list/type-id/${API_CONFIG.typeId}/manufacturer-id/${manufacturerId}/lang-id/${API_CONFIG.langId}/country-filter-id/${API_CONFIG.countryFilterId}`;
+  
+  try {
+    const response = await fetch(url, { headers: API_CONFIG.headers });
+    const data = await response.json();
+    state.models = data[0].models || [];
+    setupModelSearch();
+  } catch (error) {
+    console.error('Error loading models:', error);
+  }
+}
+
+function setupModelSearch() {
+  const input = document.getElementById('model-input');
+  const dropdown = document.getElementById('model-dropdown');
+  
+  input.addEventListener('input', () => {
+    const query = input.value.toLowerCase();
+    if (query.length === 0) {
+      dropdown.style.display = 'none';
+      return;
+    }
+    
+    const matches = state.models.filter(m => 
+      m.modelName.toLowerCase().includes(query)
+    ).slice(0, 50);
+    
+    dropdown.innerHTML = matches.map(m => `
+      <div class="dropdown-item" onclick="selectModel(${m.modelId}, '${m.modelName.replace(/'/g, "\\'")}')">
+        <div class="item-name">${m.modelName}</div>
+        <div class="item-meta">#${m.modelId} | ${m.modelYearFrom ? new Date(m.modelYearFrom).getFullYear() : ''} - ${m.modelYearTo ? new Date(m.modelYearTo).getFullYear() : 'Present'}</div>
+      </div>
+    `).join('');
+    
+    dropdown.style.display = matches.length > 0 ? 'block' : 'none';
+  });
+  
+  input.addEventListener('blur', () => setTimeout(() => dropdown.style.display = 'none', 200));
+}
+
+async function selectModel(id, name) {
+  state.model = {id, name};
+  
+  document.getElementById('model-input').value = name;
+  document.getElementById('model-selected').innerHTML = `
+    <div class="selected-label">Selected</div>
+    <div class="selected-value">${name}</div>
+  `;
+  document.getElementById('model-selected').classList.add('visible');
+  
+  await loadVehicles(state.manufacturer.id, id);
+  activateStep('step-vehicle');
+}
+
+// Step 3: Load Vehicles/Engines
+async function loadVehicles(manufacturerId, modelId) {
+  const listEl = document.getElementById('vehicle-list');
+  listEl.innerHTML = '<div class="loading">Loading engines...</div>';
+  
+  const url = `${API_CONFIG.baseURL}/vehicles/list/type-id/${API_CONFIG.typeId}/lang-id/${API_CONFIG.langId}/country-filter-id/${API_CONFIG.countryFilterId}/manufacturer-id/${manufacturerId}/model-series-id/${modelId}`;
+  
+  try {
+    const response = await fetch(url, { headers: API_CONFIG.headers });
+    const data = await response.json();
+    state.vehicles = data[0]?.vehicles || [];
+    
+    listEl.innerHTML = state.vehicles.map(v => `
+      <div class="list-item" onclick="selectVehicle(${v.vehicleId}, '${v.vehicleName.replace(/'/g, "\\'")}', '${v.motorType}')">
+        <div class="list-item-title">${v.vehicleName}</div>
+        <div class="list-item-meta">${v.motorType} | ${v.powerKw} kW (${v.powerHp} HP) | ${v.capacityCcm} cc</div>
+      </div>
+    `).join('');
+  } catch (error) {
+    listEl.innerHTML = '<div class="error">Failed to load engines</div>';
+    console.error('Error loading vehicles:', error);
+  }
+}
+
+async function selectVehicle(id, name, motorType) {
+  state.vehicle = {id, name, motorType};
+  
+  document.getElementById('vehicle-selected').innerHTML = `
+    <div class="selected-label">Selected</div>
+    <div class="selected-value">${name}</div>
+  `;
+  document.getElementById('vehicle-selected').classList.add('visible');
+  
+  await loadCategories(id);
+  activateStep('step-category');
+}
+
+// Step 4: Load Categories
+async function loadCategories(vehicleId) {
+  const listEl = document.getElementById('category-list');
+  listEl.innerHTML = '<div class="loading">Loading categories...</div>';
+  
+  const url = `${API_CONFIG.baseURL}/categories/v1/type-id/${API_CONFIG.typeId}/lang-id/${API_CONFIG.langId}/country-filter-id/${API_CONFIG.countryFilterId}/manufacturer-id/${state.manufacturer.id}/vehicle-id/${vehicleId}`;
+  
+  try {
+    const response = await fetch(url, { headers: API_CONFIG.headers });
+    const data = await response.json();
+    state.categories = data[0]?.categories || [];
+    
+    listEl.innerHTML = state.categories.map(c => `
+      <div class="list-item" onclick="selectCategory(${c.productGroupId}, '${c.productGroupName.replace(/'/g, "\\'")}')">
+        <div class="list-item-title">${c.productGroupName}</div>
+        <div class="list-item-meta">Product Group #${c.productGroupId}</div>
+      </div>
+    `).join('');
+  } catch (error) {
+    listEl.innerHTML = '<div class="error">Failed to load categories</div>';
+    console.error('Error loading categories:', error);
+  }
+}
+
+async function selectCategory(id, name) {
+  state.category = {id, name};
+  
+  document.getElementById('category-selected').innerHTML = `
+    <div class="selected-label">Selected</div>
+    <div class="selected-value">${name}</div>
+  `;
+  document.getElementById('category-selected').classList.add('visible');
+  
+  await loadParts(id);
+  activateStep('step-parts');
+}
+
+// Step 5: Load Parts
+async function loadParts(productGroupId) {
+  const listEl = document.getElementById('parts-list');
+  listEl.innerHTML = '<div class="loading">Loading parts...</div>';
+  
+  const url = `${API_CONFIG.baseURL}/articles/list/type-id/${API_CONFIG.typeId}/lang-id/${API_CONFIG.langId}/country-filter-id/${API_CONFIG.countryFilterId}/manufacturer-id/${state.manufacturer.id}/vehicle-id/${state.vehicle.id}/product-group-id/${productGroupId}`;
+  
+  try {
+    const response = await fetch(url, { headers: API_CONFIG.headers });
+    const data = await response.json();
+    state.parts = data[0]?.articles || [];
+    
+    listEl.innerHTML = state.parts.map(p => `
+      <div class="list-item" onclick="selectPart(${p.articleId}, '${p.articleName.replace(/'/g, "\\'")}', '${p.articleNo}', '${p.supplierName.replace(/'/g, "\\'")}')">
+        <div class="list-item-title">${p.articleName}</div>
+        <div class="list-item-meta">${p.supplierName} | Part #${p.articleNo}</div>
+      </div>
+    `).join('');
+  } catch (error) {
+    listEl.innerHTML = '<div class="error">Failed to load parts</div>';
+    console.error('Error loading parts:', error);
+  }
+}
+
+async function selectPart(id, name, articleNo, supplier) {
+  state.part = {id, name, articleNo, supplier};
+  
+  await loadPartDetails(id);
+}
+
+// Load Part Details
+async function loadPartDetails(articleId) {
+  const url = `${API_CONFIG.baseURL}/article/details/article-id/${articleId}/lang-id/${API_CONFIG.langId}/country-id/${API_CONFIG.countryFilterId}`;
+  
+  try {
+    const response = await fetch(url, { headers: API_CONFIG.headers });
+    const data = await response.json();
+    const details = data[0];
+    
+    document.getElementById('part-title').textContent = state.part.name;
+    document.getElementById('detail-grid').innerHTML = `
+      <div class="detail-item">
+        <div class="detail-key">Part Number</div>
+        <div class="detail-val">${state.part.articleNo}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-key">Supplier</div>
+        <div class="detail-val">${state.part.supplier}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-key">Article ID</div>
+        <div class="detail-val">${articleId}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-key">Manufacturer</div>
+        <div class="detail-val">${state.manufacturer.name}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-key">Model</div>
+        <div class="detail-val">${state.model.name}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-key">Engine</div>
+        <div class="detail-val">${state.vehicle.motorType}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-key">Category</div>
+        <div class="detail-val">${state.category.name}</div>
+      </div>
+    `;
+    
+    document.getElementById('part-details').classList.add('visible');
+    document.getElementById('part-details').scrollIntoView({ behavior: 'smooth' });
+  } catch (error) {
+    console.error('Error loading part details:', error);
+  }
+}
+
+function activateStep(stepId) {
+  document.getElementById(stepId).classList.add('active');
+}
+
+function resetAll() {
+  location.reload();
+}
+
+// Start
+init();
+</script>
+</body>
+</html>
