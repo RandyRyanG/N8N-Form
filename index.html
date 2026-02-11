@@ -330,7 +330,7 @@ const resId = document.getElementById('res-id');
 const submitBtn = document.getElementById('submit-btn');
 const countBadge = document.getElementById('count-badge');
 
-let selected = null;
+window.selected = null;
 let activeIndex = -1;
 
 function highlight(text, query) {
@@ -377,7 +377,7 @@ function closeDropdown() {
 }
 
 function selectItem(name, id) {
-  selected = { manufacturerName: name, manufacturerId: id };
+  window.selected = { manufacturerName: name, manufacturerId: id };
   input.value = name;
   clearBtn.style.display = 'block';
   closeDropdown();
@@ -390,7 +390,7 @@ function selectItem(name, id) {
 }
 
 function clearSelection() {
-  selected = null;
+  window.selected = null;
   input.value = '';
   clearBtn.style.display = 'none';
   resultBox.classList.remove('visible');
@@ -401,7 +401,7 @@ function clearSelection() {
 }
 
 input.addEventListener('input', () => {
-  selected = null;
+  window.selected = null;
   resultBox.classList.remove('visible');
   submitBtn.classList.remove('visible');
   clearBtn.style.display = input.value.length > 0 ? 'block' : 'none';
@@ -437,14 +437,14 @@ input.addEventListener('blur', () => setTimeout(closeDropdown, 150));
 clearBtn.addEventListener('click', clearSelection);
 
 submitBtn.addEventListener('click', async () => {
-  if (!selected) return;
+  if (!window.selected) return;
   
   submitBtn.textContent = '⏳  SENDING...';
   submitBtn.style.opacity = '0.6';
   
-  const payload = {
-    manufacturerId: selected.manufacturerId,
-    manufacturerName: selected.manufacturerName,
+const payload = {
+    manufacturerId: window.selected.manufacturerId,
+    manufacturerName: window.selected.manufacturerName,
     timestamp: new Date().toISOString()
   };
   
@@ -475,5 +475,6 @@ submitBtn.addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
