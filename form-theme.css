@@ -1,0 +1,452 @@
+/* ===================================
+   Industrial/Utilitarian Form Theme
+   Created for n8n workflow forms
+   =================================== */
+
+/* Reset & Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* CSS Variables - Customize these for different color schemes */
+:root {
+  --bg: #0e0f11;
+  --surface: #16181c;
+  --border: #2a2d35;
+  --accent: #e8c84a;
+  --accent-dim: rgba(232, 200, 74, 0.12);
+  --text: #e2e4e9;
+  --muted: #5a5f6e;
+  --mono: 'Share Tech Mono', monospace;
+  --sans: 'Barlow', sans-serif;
+}
+
+/* Body & Layout */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 39px, rgba(255, 255, 255, 0.02) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255, 255, 255, 0.02) 39px, rgba(255, 255, 255, 0.02) 40px);
+}
+
+/* Card Container */
+.card {
+  width: 100%;
+  max-width: 640px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2.5rem;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent);
+}
+
+/* Header Elements */
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  padding: 2px 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.back-btn {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+  padding: 0;
+}
+
+.back-btn:hover {
+  color: var(--accent);
+}
+
+h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+/* Info Box */
+.manufacturer-info {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.manufacturer-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.manufacturer-id {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* Form Fields */
+.field-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+input[type="text"] {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.85rem 2.5rem 0.85rem 1rem;
+  outline: none;
+  transition: border-color 0.15s;
+  letter-spacing: 0.01em;
+}
+
+input[type="text"]:focus {
+  border-color: var(--accent);
+}
+
+input[type="text"]::placeholder {
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  display: none;
+  transition: color 0.15s;
+}
+
+.clear-btn:hover {
+  color: var(--accent);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-top: none;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+}
+
+.dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dropdown::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+.dropdown-item {
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+  background: var(--accent-dim);
+}
+
+.item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.item-name mark {
+  background: none;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.item-meta {
+  display: flex;
+  gap: 1rem;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.item-id {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.no-results {
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+/* Result Box */
+.result-box {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: none;
+}
+
+.result-box.visible {
+  display: block;
+}
+
+.result-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.result-key {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.result-val {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.result-val.accent {
+  color: var(--accent);
+}
+
+.result-val.small {
+  font-size: 0.75rem;
+}
+
+/* Buttons */
+.submit-btn {
+  margin-top: 1.5rem;
+  width: 100%;
+  background: var(--accent);
+  color: #0e0f11;
+  border: none;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.9rem;
+  cursor: pointer;
+  font-weight: 700;
+  transition: opacity 0.15s;
+  display: none;
+}
+
+.submit-btn:hover {
+  opacity: 0.85;
+}
+
+.submit-btn.visible {
+  display: block;
+}
+
+.error-btn {
+  background: var(--accent);
+  color: #0e0f11;
+  border: none;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-weight: 700;
+  transition: opacity 0.15s;
+}
+
+.error-btn:hover {
+  opacity: 0.85;
+}
+
+/* Count Badge */
+.count-badge {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 0.4rem;
+  letter-spacing: 0.05em;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.error-state h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--muted);
+}
+
+.error-state p {
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+/* ===================================
+   Alternative Color Schemes
+   =================================== */
+
+/* Blue Tech Theme - Uncomment to use */
+/*
+:root {
+  --bg: #0a0e1a;
+  --surface: #141824;
+  --border: #252a3d;
+  --accent: #4a9eff;
+  --accent-dim: rgba(74, 158, 255, 0.12);
+  --text: #e2e8f0;
+  --muted: #64748b;
+}
+*/
+
+/* Green Terminal Theme - Uncomment to use */
+/*
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --accent: #39d353;
+  --accent-dim: rgba(57, 211, 83, 0.12);
+  --text: #c9d1d9;
+  --muted: #8b949e;
+}
+*/
+
+/* Purple Cyber Theme - Uncomment to use */
+/*
+:root {
+  --bg: #0f0a1e;
+  --surface: #1a1329;
+  --border: #2d2040;
+  --accent: #c084fc;
+  --accent-dim: rgba(192, 132, 252, 0.12);
+  --text: #e9d5ff;
+  --muted: #a78bfa;
+}
+*/
+
+/* Red Alert Theme - Uncomment to use */
+/*
+:root {
+  --bg: #1a0d0d;
+  --surface: #241414;
+  --border: #3d2525;
+  --accent: #ff4a4a;
+  --accent-dim: rgba(255, 74, 74, 0.12);
+  --text: #f0e2e2;
+  --muted: #b48b8b;
+}
+*/
