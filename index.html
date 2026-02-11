@@ -447,7 +447,7 @@ submitBtn.addEventListener('click', async () => {
     return;
   }
   
-  submitBtn.textContent = '⏳  SENDING...';
+  submitBtn.textContent = '⏳  LOADING MODELS...';
   submitBtn.style.opacity = '0.6';
   
   const payload = {
@@ -468,11 +468,16 @@ submitBtn.addEventListener('click', async () => {
     console.log('Response status:', response.status);
     
     if (response.ok) {
-      submitBtn.textContent = '✓  TRIGGERED';
-      setTimeout(() => {
-        submitBtn.textContent = '▶  TRIGGER WORKFLOW';
-        submitBtn.style.opacity = '1';
-      }, 2000);
+      const data = await response.json();
+      console.log('Received models:', data);
+      
+      // Store data in sessionStorage and redirect to model selector
+      sessionStorage.setItem('manufacturerData', JSON.stringify({
+        manufacturer: window.selectedManufacturer,
+        models: data
+      }));
+      
+      window.location.href = 'model_lookup.html';
     } else {
       throw new Error('Failed');
     }
@@ -489,4 +494,5 @@ submitBtn.addEventListener('click', async () => {
 console.log('Script loaded successfully');
 </script>
 </body>
+
 </html>
